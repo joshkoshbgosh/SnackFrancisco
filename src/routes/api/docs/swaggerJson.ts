@@ -1,5 +1,5 @@
-import { createAPIFileRoute } from '@tanstack/react-start/api'
-import { json } from '@tanstack/react-start'
+import { createAPIFileRoute } from '@tanstack/start/api'
+import { json } from '@tanstack/start'
 import { swaggerSpec } from 'src/swagger'
 
 export const APIRoute = createAPIFileRoute('/api/docs/swaggerJson')({
