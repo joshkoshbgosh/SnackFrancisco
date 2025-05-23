@@ -9,7 +9,7 @@ export const Route = createFileRoute('/docs')({
 function DocsPage() {
   return (
     <div className="h-screen w-full">
-      <SwaggerUI url="/api/docs/swaggerJson" />
+      <SwaggerUI url="/api/docs/swaggerJson" layout="BaseLayout"/>
     </div>
   )
 }
