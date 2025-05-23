@@ -6,6 +6,7 @@ export const Route = createFileRoute('/docs')({
   component: DocsPage,
 })
 
+// TODO: use <ClientOnly/> instead of manual client check
 function DocsPage() {
   const [mounted, setMounted] = useState(false)
 

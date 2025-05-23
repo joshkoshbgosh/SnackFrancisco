@@ -34,5 +34,47 @@ export const swaggerSpec = {
         },
       },
     },
+    '/api/search': {
+      get: {
+        summary: 'Search food trucks',
+        description: 'Filter food trucks by applicant name, status, and street name.',
+        parameters: [
+          {
+            name: 'applicant',
+            in: 'query',
+            description: 'Partial match on the applicant name (case-insensitive)',
+            required: false,
+            schema: { type: 'string' },
+          },
+          {
+            name: 'status',
+            in: 'query',
+            description: 'Exact match on the status (e.g., APPROVED)',
+            required: false,
+            schema: { type: 'string' },
+          },
+          {
+            name: 'street',
+            in: 'query',
+            description: 'Partial match on the street name (case-insensitive)',
+            required: false,
+            schema: { type: 'string' },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Filtered food trucks',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: { type: 'object' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   },
 }
