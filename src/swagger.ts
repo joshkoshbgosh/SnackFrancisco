@@ -1,21 +1,28 @@
-import swaggerJSDoc from 'swagger-jsdoc'
-
-export const swaggerSpec = swaggerJSDoc({
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'SnackFrancisco API',
-      version: '1.0.0',
-      description: 'API to search and locate mobile food facilities in San Francisco',
-    },
-    servers: [
-      {
-        url: 'http://localhost:3000',
-      },
-      {
-        url: 'http://snack-francisco.vercel.app',
-      },
-    ],
+export const swaggerSpec = {
+  openapi: '3.0.0',
+  info: {
+    title: 'SnackFrancisco API',
+    version: '1.0.0',
+    description: 'Search and locate food trucks in San Francisco',
   },
-  apis: ['src/routes/api/**/*.ts'],
-})
+  paths: {
+    '/api/list': {
+      get: {
+        summary: 'Get all food trucks',
+        responses: {
+          200: {
+            description: 'List of food trucks',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: { type: 'object' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+}
