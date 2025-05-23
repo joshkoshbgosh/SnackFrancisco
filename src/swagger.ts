@@ -5,6 +5,16 @@ export const swaggerSpec = {
     version: '1.0.0',
     description: 'Search and locate food trucks in San Francisco',
   },
+  servers: [
+    {
+      url: 'http://localhost:3000',
+      description: 'Local development server',
+    },
+    {
+      url: 'https://your-app-name.vercel.app',
+      description: 'Production server',
+    },
+  ],
   paths: {
     '/api/list': {
       get: {
