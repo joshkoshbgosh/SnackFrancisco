@@ -11,7 +11,7 @@ export const swaggerSpec = {
       description: 'Local development server',
     },
     {
-      url: 'https://your-app-name.vercel.app',
+      url: 'https://snack-francisco.vercel.app',
       description: 'Production server',
     },
   ],
