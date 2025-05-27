@@ -7,29 +7,29 @@ const MAX_CLOSEST_RESULTS = 5;
 
 export const APIRoute = createAPIFileRoute("/api/locate")({
 	GET: async ({ request }) => {
-		const url = new URL(request.url);
-		const lat = url.searchParams.get("lat");
-		const lng = url.searchParams.get("lng");
-		const status = url.searchParams.get("status") || "APPROVED";
+		const url = new URL(request.url)
+		const lat = url.searchParams.get("lat")
+		const lng = url.searchParams.get("lng")
+		const status = url.searchParams.get("status") || "APPROVED"
 
 		// TODO: extract lat / lng validation. Also validate whether lat / lng are real, and ideally whether they're in SF
 		if (!lat || !lng || Number.isNaN(Number(lat)) || Number.isNaN(Number(lng))) {
-			return json("Missing or invalid lat/lng", { status: 400 });
+			return json("Missing or invalid lat/lng", { status: 400 })
 		}
 
 		const fetchFoodTrucksResponse = await fetchFoodTrucks();
 		if (!fetchFoodTrucksResponse.success) {
-			return json(fetchFoodTrucksResponse.error, { status: 500 });
+			return json(fetchFoodTrucksResponse.error, { status: 500 })
 		}
 
 		const trucks = fetchFoodTrucksResponse.data
 			.filter((t) => t.status === status)
-			.splice(0, 25); // TODO: remove temp testing limit
+			.splice(0, 25) // TODO: remove temp testing limit
 
 		const batches = Array.from(
 			{ length: Math.ceil(trucks.length / MAX_BATCH_SIZE) },
 			(_, i) => trucks.slice(i * MAX_BATCH_SIZE, (i + 1) * MAX_BATCH_SIZE),
-		);
+		)
 
 		// Design Tradeoff. Swalling errors at the fetchTruckDistances function level
 		// means all of the promises will resolve successfully regardless of whether the requests went through
@@ -37,21 +37,20 @@ export const APIRoute = createAPIFileRoute("/api/locate")({
 		const truckDistanceRequests = batches.map((batch) =>
 			fetchTruckDistances(batch, lat, lng),
 		)
-		const truckDistanceResponses = await Promise.all(truckDistanceRequests);
+		const truckDistanceResponses = await Promise.all(truckDistanceRequests)
 		const successfulTruckDistanceResponses = truckDistanceResponses.filter(
 			(r) => r.success,
 		)
 		const allTruckDistanceRequestsSuccessful =
 			successfulTruckDistanceResponses.length === truckDistanceResponses.length;
 		if (!allTruckDistanceRequestsSuccessful) {
-			return json("Failed to fetch truck distances", { status: 500 });
+			return json("Failed to fetch all truck distances", { status: 500 })
 		}
 		const elements = successfulTruckDistanceResponses.flatMap(
 			(r) => r.data.rows[0].elements,
 		)
-		// TODO: validate google maps response\
 		if (!elements || elements.length !== trucks.length) {
-			return json("Distance matrix error", { status: 500 });
+			return json("Distance matrix error", { status: 500 })
 		}
 
 		const distanceResults = trucks.map((truck, i) => ({
