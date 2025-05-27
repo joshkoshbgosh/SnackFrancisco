@@ -29,7 +29,13 @@ export const fetchFoodTrucks = async (): Promise<
 		const data = await response.json()
 		const trucks = z.array(FoodTruckSchema).parse(data)
 
-		return { success: true, data: trucks }
+        const filteredTrucks = trucks.filter(t => {
+            // TODO: Fix this hacky workarouund. A few food trucks, of which only 6 at time of writing are status=APPROVED, have latitudes and longitudes of 0.0
+            // At least some have addresses so technically we should be able to find them that way
+            if (t.location.latitude === "0.0") return false;
+            return true;
+        })
+		return { success: true, data: filteredTrucks }
 	} catch (e) {
 		// TODO: check to see if error came from fetch, json parsing, or zod validation.
 		// Trigger an error log, and give the consumer an enum of possible failure reasons to handle accordingly.
@@ -51,14 +57,16 @@ export const fetchTruckDistances = async (
 	try {
 		const response = await fetch(matrixURL);
 		const data = await response.json();
-		const matrix = GoogleDistanceMatrixResponseSchema.parse(data);
+		const matrix = GoogleDistanceMatrixResponseSchema.parse(data,{});
 
+        console.log(matrix.rows[0].elements.map(e => e.distance.value))
         // TODO: Handle cases where request went through successfully but either response status or element statuses are NOT "ok"
 		return { success: true, data: matrix };
 	} catch (e) {
 		// TODO: check to see if error came from fetch, json parsing, or zod validation.
 		// Trigger an error log, and give the consumer an enum of possible failure reasons to handle accordingly.
-		return {
+		console.log(e)
+        return {
 			success: false,
 			error: "Failed to fetch food truck distances",
 		};
