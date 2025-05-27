@@ -1,13 +1,14 @@
 import type { ReactNode } from 'react'
 import {
   Outlet,
-  createRootRoute,
+  createRootRouteWithContext,
   HeadContent,
   Scripts,
 } from '@tanstack/react-router'
 import appCss from "@/styles/app.css?url"
+import type { QueryClient } from '@tanstack/react-query'
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{queryClient: QueryClient}>()({
   head: () => ({
     meta: [
       {
@@ -41,7 +42,7 @@ function RootComponent() {
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html>
+    <html lang="en">
       <head>
         <HeadContent />
       </head>

@@ -2,6 +2,7 @@ import {
 	isValidFoodTruckStatus,
 	type FoodTruckStatus,
 } from "@/schemas/foodTruck"
+import { isValidLat, isValidLng } from "../schemas/latLng"
 
 export const getSearchParams = (url: URL) => ({
 	origin: url.searchParams.get("origin") ?? undefined,
@@ -9,9 +10,6 @@ export const getSearchParams = (url: URL) => ({
 	applicant: url.searchParams.get("applicant") ?? undefined,
 	street: url.searchParams.get("street") ?? undefined,
 })
-
-const isValidLat = (lat: number) => !Number.isNaN(lat) && Math.abs(lat) <= 90
-const isValidLng = (lng: number) => !Number.isNaN(lng) && Math.abs(lng) <= 180
 
 export const parseSearchParams = (params: {
 	origin?: string
