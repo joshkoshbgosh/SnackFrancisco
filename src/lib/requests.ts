@@ -6,8 +6,6 @@ import {
 	GoogleDistanceMatrixResponseSchema,
 	type GoogleDistanceMatrixResponse,
 } from "@/schemas/googleMaps"
-import type { parseSearchParams } from "./apiParams"
-import { filterTrucks } from "./filterTrucks"
 
 export type FetchResponse<T, E = string> =
 	| {
