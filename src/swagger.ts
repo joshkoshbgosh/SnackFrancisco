@@ -1,3 +1,5 @@
+// TODO: Colocate swagger specs with endpoint code
+
 export const swaggerSpec = {
 	openapi: "3.0.0",
 	info: {
@@ -18,6 +20,7 @@ export const swaggerSpec = {
 	paths: {
 		"/api/list": {
 			get: {
+        tags: ["Food Trucks"],
 				summary: "Get all food trucks",
 				responses: {
 					200: {
@@ -36,6 +39,7 @@ export const swaggerSpec = {
 		},
 		"/api/search": {
 			get: {
+        tags: ["Food Trucks"],
 				summary: "Search food trucks",
 				description:
 					"Filter food trucks by applicant name, status, and street name.",
