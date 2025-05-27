@@ -14,6 +14,8 @@ export const FoodTruckSchema = z.object({
     latitude: z.string(),
     longitude: z.string(),
   }),
+  distance_meters: z.number().optional(),
+  duration_text: z.string().optional()
 })
 
 export type FoodTruck = z.infer<typeof FoodTruckSchema>

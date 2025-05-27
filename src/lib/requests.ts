@@ -6,17 +6,17 @@ import {
 	GoogleDistanceMatrixResponseSchema,
 	type GoogleDistanceMatrixResponse,
 } from "@/schemas/googleMaps"
+import type { parseSearchParams } from "./apiParams"
+import { filterTrucks } from "./filterTrucks"
 
-// TODO: Add second generic type for error to allow consumers
-// to receive a strictly enumerated type of possible error reasons
-type FetchResponse<T> =
+export type FetchResponse<T, E = string> =
 	| {
 			success: true
 			data: T
 	  }
 	| {
 			success: false
-			error: string
+			error: E
 	  }
 
 // TODO: Look into filtering on Socrata's end so as to avoid filtering work on our end
