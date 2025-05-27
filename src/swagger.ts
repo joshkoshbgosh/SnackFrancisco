@@ -18,31 +18,12 @@ export const swaggerSpec = {
 		},
 	],
 	paths: {
-		"/api/list": {
-			get: {
-        tags: ["Food Trucks"],
-				summary: "Get all food trucks",
-				responses: {
-					200: {
-						description: "List of food trucks",
-						content: {
-							"application/json": {
-								schema: {
-									type: "array",
-									items: { type: "object" },
-								},
-							},
-						},
-					},
-				},
-			},
-		},
 		"/api/search": {
 			get: {
-        tags: ["Food Trucks"],
-				summary: "Search food trucks",
+				tags: ["Food Trucks"],
+				summary: "Search Food Trucks",
 				description:
-					"Filter food trucks by applicant name, status, and street name.",
+					'Returns food trucks filtered by applicant, street name, and status. If lat/lng specified in origin query param, results are sorted by real-world travel distance using Google Maps Distance Matrix',
 				parameters: [
 					{
 						name: "applicant",
@@ -53,57 +34,19 @@ export const swaggerSpec = {
 						schema: { type: "string" },
 					},
 					{
-						name: "status",
-						in: "query",
-						description: "Exact match on the status (e.g., APPROVED)",
-						required: false,
-						schema: { type: "string" },
-					},
-					{
 						name: "street",
 						in: "query",
 						description: "Partial match on the street name (case-insensitive)",
 						required: false,
 						schema: { type: "string" },
 					},
-				],
-				responses: {
-					200: {
-						description: "Filtered food trucks",
-						content: {
-							"application/json": {
-								schema: {
-									type: "array",
-									items: { type: "object" },
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		"/api/locate": {
-			get: {
-				tags: ["Food Trucks"],
-				summary: "Get the 5 nearest food trucks to a given location",
-				description:
-					'Returns the 5 closest food trucks to the specified latitude and longitude, sorted by real-world travel distance using Google Maps Distance Matrix. Only "APPROVED" trucks are returned by default.',
-				parameters: [
 					{
-						name: "lat",
+						name: "origin",
 						in: "query",
 						required: true,
-						schema: { type: "string", pattern: "^-?\\d+(\\.\\d+)?$" },
-						description: "Latitude of the user location",
-            default: "37.786471"
-					},
-					{
-						name: "lng",
-						in: "query",
-						required: true,
-						schema: { type: "string", pattern: "^-?\\d+(\\.\\d+)?$" },
-						description: "Longitude of the user location",
-            default: "-122.398546"
+						schema: { type: "string" },
+						description: "Comma Separated Latitude / Longitude of the user location",
+            			default: "37.786471,-122.398546"
 					},
 					{
 						name: "status",
@@ -111,14 +54,14 @@ export const swaggerSpec = {
 						required: false,
 						schema: {
 							type: "string",
-							enum: ["APPROVED", "REQUESTED", "EXPIRED"],
+							enum: ["APPROVED", "REQUESTED", "EXPIRED", "SUSPEND", "ISSUED"],
 						},
 						description: "Filter by food truck status (default: APPROVED)",
 					},
 				],
 				responses: {
 					200: {
-						description: "5 closest food trucks by travel distance",
+						description: "Food trucks filtered by applicant, street, status, and sorted by distance if origin lat / lng provided",
 						content: {
 							"application/json": {
 								schema: {
@@ -154,19 +97,27 @@ export const swaggerSpec = {
 						},
 					},
 					400: {
-						description: "Missing or invalid lat/lng query parameters",
+						description: "Invalid query parameters",
 						content: {
 							"application/json": {
 								schema: {
 									type: "object",
 									properties: {
-										error: { type: "string" },
+										errors: { 
+											type: "object",
+											properties: {
+												applicant: { type: "string" },
+												status: { type: "string" },
+												street: { type: "string" },
+												origin: { type: "string" }
+											}
+										},
 									},
 								},
 							},
 						},
 					},
-					502: {
+					500: {
 						description: "Upstream data or Google API failure",
 						content: {
 							"application/json": {
