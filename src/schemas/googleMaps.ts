@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod"
 
 export const DistanceMatrixElementSchema = z.object({
 	distance: z.object({
@@ -12,9 +12,9 @@ export const DistanceMatrixElementSchema = z.object({
 	}), // Technically, element might not include duration if no route found, so optional() might be better but for our case this should be fine
 
 	status: z.string(), // TODO: change to enum based on possible values
-});
+})
 
-export type DistanceMatrixElement = z.infer<typeof DistanceMatrixElementSchema>;
+export type DistanceMatrixElement = z.infer<typeof DistanceMatrixElementSchema>
 
 export const GoogleDistanceMatrixResponseSchema = z.object({
 	rows: z.array(
@@ -23,8 +23,8 @@ export const GoogleDistanceMatrixResponseSchema = z.object({
 		}),
 	).min(1).max(1), // Should only be one row since only considering one origin
 	status: z.string(), // TODO: change to enum based on possible values
-});
+})
 
 export type GoogleDistanceMatrixResponse = z.infer<
 	typeof GoogleDistanceMatrixResponseSchema
->;
+>

@@ -38,8 +38,8 @@ export const APIRoute = createAPIFileRoute('/api/search')({
 
       return json(filtered)
     } catch (error) {
-      setResponseStatus(500);
-      return new Response('Unable to fetch food trucks');
+      setResponseStatus(500)
+      return new Response('Unable to fetch food trucks')
     }
   },
 })

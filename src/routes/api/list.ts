@@ -13,10 +13,10 @@ export const APIRoute = createAPIFileRoute('/api/list')({
       const data = await fetch(FOOD_TRUCKS_API_URL).then(res => res.json())
       // TODO: specify in catch that error is validation related. Only relevant for devs so maybe an error log?
       const trucks = z.array(FoodTruckSchema).parse(data)
-      return json(trucks);
+      return json(trucks)
     } catch (error) {
-      setResponseStatus(500);
-      return new Response('Unable to fetch food trucks');
+      setResponseStatus(500)
+      return new Response('Unable to fetch food trucks')
     }
   },
 })

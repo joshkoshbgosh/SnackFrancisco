@@ -1,6 +1,6 @@
-import type { FoodTruck } from "@/schemas/foodTruck";
-import { GOOGLE_MAPS_MATRIX_URL_PREFIX } from "./constants";
-import { env } from "@/env";
+import type { FoodTruck } from "@/schemas/foodTruck"
+import { GOOGLE_MAPS_MATRIX_URL_PREFIX } from "./constants"
+import { env } from "@/env"
 
 export const buildGoogleMapsMatrixURL = (candidates: FoodTruck[], lat: string, lng: string) => {
     // TODO: validate lat / lng params

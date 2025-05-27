@@ -1,6 +1,6 @@
-import { createAPIFileRoute } from "@tanstack/start/api";
-import { json } from "@tanstack/start";
-import { fetchFoodTrucks, fetchTruckDistances } from "@/utils/requests";
+import { createAPIFileRoute } from "@tanstack/start/api"
+import { json } from "@tanstack/start"
+import { fetchFoodTrucks, fetchTruckDistances } from "@/utils/requests"
 
 const MAX_BATCH_SIZE = 25
 const MAX_CLOSEST_RESULTS = 5
@@ -17,7 +17,7 @@ export const APIRoute = createAPIFileRoute("/api/locate")({
 			return json("Missing or invalid lat/lng", { status: 400 })
 		}
 
-		const fetchFoodTrucksResponse = await fetchFoodTrucks();
+		const fetchFoodTrucksResponse = await fetchFoodTrucks()
 		if (!fetchFoodTrucksResponse.success) {
 			return json(fetchFoodTrucksResponse.error, { status: 500 })
 		}
@@ -42,7 +42,7 @@ export const APIRoute = createAPIFileRoute("/api/locate")({
 			(r) => r.success,
 		)
 		const allTruckDistanceRequestsSuccessful =
-			successfulTruckDistanceResponses.length === truckDistanceResponses.length;
+			successfulTruckDistanceResponses.length === truckDistanceResponses.length
 		if (!allTruckDistanceRequestsSuccessful) {
 			return json("Failed to fetch all truck distances", { status: 500 })
 		}
@@ -70,4 +70,4 @@ export const APIRoute = createAPIFileRoute("/api/locate")({
 
 		return json(closest)
 	},
-});
+})
