@@ -2,8 +2,8 @@ import { createAPIFileRoute } from "@tanstack/start/api";
 import { json } from "@tanstack/start";
 import { fetchFoodTrucks, fetchTruckDistances } from "@/utils/requests";
 
-const MAX_BATCH_SIZE = 25;
-const MAX_CLOSEST_RESULTS = 5;
+const MAX_BATCH_SIZE = 25
+const MAX_CLOSEST_RESULTS = 5
 
 export const APIRoute = createAPIFileRoute("/api/locate")({
 	GET: async ({ request }) => {
