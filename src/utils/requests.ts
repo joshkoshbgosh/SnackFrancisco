@@ -59,13 +59,11 @@ export const fetchTruckDistances = async (
 		const data = await response.json()
 		const matrix = GoogleDistanceMatrixResponseSchema.parse(data,{})
 
-        console.log(matrix.rows[0].elements.map(e => e.distance.value))
         // TODO: Handle cases where request went through successfully but either response status or element statuses are NOT "ok"
 		return { success: true, data: matrix }
 	} catch (e) {
 		// TODO: check to see if error came from fetch, json parsing, or zod validation.
 		// Trigger an error log, and give the consumer an enum of possible failure reasons to handle accordingly.
-		console.log(e)
         return {
 			success: false,
 			error: "Failed to fetch food truck distances",
