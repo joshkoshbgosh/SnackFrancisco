@@ -1,8 +1,8 @@
 import { createAPIFileRoute } from "@tanstack/start/api"
 import { json } from "@tanstack/start"
-import { fetchFoodTrucks, fetchTruckDistances } from "@/utils/requests"
-import { filterTrucks } from "@/utils/filterTrucks"
-import { parseSearchParams, getSearchParams } from "@/utils/apiParams"
+import { fetchFoodTrucks, fetchTruckDistances } from "@/lib/requests"
+import { filterTrucks } from "@/lib/filterTrucks"
+import { parseSearchParams, getSearchParams } from "@/lib/apiParams"
 
 const MAX_BATCH_SIZE = 25
 const MAX_CLOSEST_RESULTS = 999 // TODO: Set to 5 as per requirements if necessary
@@ -30,7 +30,7 @@ export const APIRoute = createAPIFileRoute("/api/search")({
 		if (!params.origin) {
 			return json(trucks)
 		}
-		const {lat,lng} = params.origin
+		const { lat, lng } = params.origin
 
 		const batches = Array.from(
 			{ length: Math.ceil(trucks.length / MAX_BATCH_SIZE) },

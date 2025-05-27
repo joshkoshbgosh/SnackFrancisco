@@ -1,5 +1,5 @@
 // TODO: Colocate swagger specs with endpoint code
-
+// TODO: doing this manually sucks, couldn't get swagger-jsdoc working, would love to find a way to autogen with TS
 export const swaggerSpec = {
 	openapi: "3.0.0",
 	info: {
