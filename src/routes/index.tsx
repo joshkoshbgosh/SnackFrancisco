@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { createFileRoute } from "@tanstack/react-router"
-import type { FoodTruck } from "@/schemas/foodTruck"
+import type { FoodTruck, FoodTruckStatus } from "@/schemas/foodTruck"
 import { useQuery } from "@tanstack/react-query"
 import { SearchParamsSchema } from "@/schemas/searchParams"
 import { searchTrucksServerFn } from "@/server/searchServerFn"
@@ -30,16 +30,24 @@ export const Route = createFileRoute("/")({
 		}), // NOTE: validation already handled by validateSearch, just parsing for TS
 })
 
+type FormState = {
+	applicant?: string
+	street?: string
+	status?: FoodTruckStatus
+	origin?: string
+	sortBy: "DEFAULT" | "PROXIMITY"
+}
+
 export function SearchPage() {
 	const query = Route.useSearch({})
 	const loaderData = Route.useLoaderData()
 
-	const [formState, setFormState] = useState({
+	const [formState, setFormState] = useState<FormState>({
 		applicant: query.applicant,
 		street: query.street,
 		status: query.status,
 		origin: query.origin,
-		sortBy: "DEFAULT" as "DEFAULT" | "PROXIMITY", // TODO: replace 'as'
+		sortBy: query.origin ? "PROXIMITY" : "DEFAULT",
 	})
 	const [committedQuery, setCommittedQuery] = useState(formState)
 
@@ -64,6 +72,12 @@ export function SearchPage() {
 	// like a premature optimization
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
+		if (formState.sortBy === "PROXIMITY" && !formState.origin) {
+			// TODO: Handle the fact that after user clicks address,
+			// lat,lng lookup is async
+			alert('missing origin')
+			return
+		}
 		setCommittedQuery(formState)
 		const params = new URLSearchParams()
 		for (const [key, value] of Object.entries(formState)) {
@@ -111,13 +125,17 @@ export function SearchPage() {
 				{formState.sortBy === "PROXIMITY" && (
 					<AddressAutocomplete
 						onSelect={(_address, lat, lng) => {
+							// TODO: Handle the fact that after user clicks address,
+							// lat,lng lookup is async
 							updateField("origin", `${lat},${lng}`)
 						}}
 					/>
 				)}
-				<Button type="submit" disabled={!isDirty}>
-					Search
-				</Button>
+				{isDirty && (
+					<Button type="submit">
+						Search
+					</Button>
+				)}
 			</form>
 
 			<div className="mt-4">
