@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -30,24 +30,42 @@ export function SearchPage() {
 		origin: query.origin,
 		sortBy: "DEFAULT" as "DEFAULT" | "PROXIMITY", // TODO: replace 'as'
 	})
+	const [committedQuery, setCommittedQuery] = useState(formState)
+	// TODO: This is quick and dirty. Technically might result in false positive
+	// dirty check because property order matters and I don't believe is guaranteed.
+	// Also inefficient but probably negligible. Either implement custom equality
+	// check or use equality checking library (probably overkill)
+	const isDirty = JSON.stringify(formState) !== JSON.stringify(committedQuery)
 
 	const updateField = (field: keyof typeof formState, value: string) => {
 		setFormState((prev) => ({ ...prev, [field]: value }))
 	}
-
 	const search = useQuery({
-		queryKey: ["search", formState],
-		queryFn: async () => searchTrucksServerFn({ data: formState }),
+		queryKey: ["search", committedQuery],
+		queryFn: async () => searchTrucksServerFn({ data: committedQuery }),
+		enabled: false,
 	})
 
-	const handleSubmit = (e: React.FormEvent) => {
+	// TODO: Find a way to remove this useEffect. Unfortunately
+	// it's the easiest / cleanest way I could find to deal with the fact that 
+	// setState is async, while also getting the advantages of useQuery vs 
+	// using the client directly. Other options include setTimeout to defer refetch
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		search.refetch()
+	}, [committedQuery])
+
+	// NOTE: Could use uncontrolled inputs and get their values
+	// on submit. Less state updates / re-renders but feels
+	// like a premature optimization
+	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
+		setCommittedQuery(formState)
 		const params = new URLSearchParams()
 		for (const [key, value] of Object.entries(formState)) {
 			if (value) params.set(key, value)
 		}
-		history.replaceState(null, "", `/search?${params.toString()}`)
-		search.refetch()
+		history.replaceState(null, "", `?${params.toString()}`)
 	}
 
 	return (
@@ -93,7 +111,9 @@ export function SearchPage() {
 						onChange={(e) => updateField("origin", e.target.value)}
 					/>
 				)}
-				<Button type="submit">Search</Button>
+				<Button type="submit" disabled={!isDirty}>
+					Search
+				</Button>
 			</form>
 
 			<div className="mt-4">
@@ -101,9 +121,10 @@ export function SearchPage() {
 				{search.isError && (
 					<p className="text-red-500">Error: {search.error.message}</p>
 				)}
-				{search.data?.success && search.data.data.map((truck: FoodTruck) => (
-					<div key={truck.objectid}>{truck.applicant}</div>
-				))}
+				{search.data?.success &&
+					search.data.data.map((truck: FoodTruck) => (
+						<div key={truck.objectid}>{truck.applicant}</div>
+					))}
 			</div>
 		</div>
 	)
