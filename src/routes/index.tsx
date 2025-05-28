@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query"
 import { SearchParamsSchema } from "@/schemas/searchParams"
 import { searchTrucksServerFn } from "@/server/searchServerFn"
 import { SEARCH_REQUEST_STALE_TIME_MS } from "@/lib/constants"
+import { AddressAutocomplete } from "@/components/AddressAutocomplete"
 
 export const Route = createFileRoute("/")({
 	component: SearchPage,
@@ -108,10 +109,10 @@ export function SearchPage() {
 				</ToggleGroup>
 
 				{formState.sortBy === "PROXIMITY" && (
-					<Input
-						placeholder="Origin (lat,lng)"
-						value={formState.origin}
-						onChange={(e) => updateField("origin", e.target.value)}
+					<AddressAutocomplete
+						onSelect={(_address, lat, lng) => {
+							updateField("origin", `${lat},${lng}`)
+						}}
 					/>
 				)}
 				<Button type="submit" disabled={!isDirty}>
