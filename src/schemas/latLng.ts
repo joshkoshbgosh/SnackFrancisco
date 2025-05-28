@@ -7,11 +7,11 @@ export const isValidLng = (lng: number) =>
 
 export const LatLngStringSchema = z.string().refine(
 	(value) => {
-		const parts = value.split(",")
+		const parts = decodeURIComponent(value).split(",")
 		if (parts.length !== 2) return false
 
 		const [lat, lng] = parts.map(Number)
-		return isValidLat(lat) && !isValidLng(lng)
+		return isValidLat(lat) && isValidLng(lng)
 	},
 	{
 		message: 'Must be a string in "lat,lng" format with valid numbers',
@@ -24,8 +24,8 @@ export const parseLatLngString = (latLng: unknown) => {
 		return {
 			...result,
 			data: {
-				lat: Number(result.data.split(",")[0]),
-				lng: Number(result.data.split(",")[1]),
+				lat: Number(decodeURIComponent(result.data).split(",")[0]),
+				lng: Number(decodeURIComponent(result.data).split(",")[1]),
 			},
 		}
 	return result
