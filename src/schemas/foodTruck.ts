@@ -14,7 +14,7 @@ export const FoodTruckSchema = z.object({
     latitude: z.string(),
     longitude: z.string(),
   }),
-  distance_meters: z.number().optional(),
+  distance_meters: z.number().optional(), // TODO: instead of hijacking the existing schema to monkey-patch distance info, create secondary schema so consumers know when to expect one or the other
   duration_text: z.string().optional()
 })
 

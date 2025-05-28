@@ -10,17 +10,10 @@ import {
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { createFileRoute } from "@tanstack/react-router"
-import { z } from "zod"
-import { FoodTruckStatusSchema, type FoodTruck } from "@/schemas/foodTruck"
-import { LatLngStringSchema } from "@/schemas/latLng"
+import type { FoodTruck } from "@/schemas/foodTruck"
 import { useQuery } from "@tanstack/react-query"
-
-const SearchParamsSchema = z.object({
-	status: FoodTruckStatusSchema.optional().catch("APPROVED"),
-	applicant: z.string().optional(),
-	street: z.string().optional(),
-	origin: LatLngStringSchema.optional(),
-})
+import { SearchParamsSchema } from "@/schemas/searchParams"
+import { searchTrucksServerFn } from "@/server/searchServerFn"
 
 export const Route = createFileRoute("/")({
 	component: SearchPage,
@@ -44,15 +37,7 @@ export function SearchPage() {
 
 	const search = useQuery({
 		queryKey: ["search", formState],
-		queryFn: async () => {
-			const params = new URLSearchParams()
-			for (const [key, value] of Object.entries(formState)) {
-				if (value) params.set(key, value)
-			}
-			const res = await fetch(`/api/search?${params}`)
-			if (!res.ok) throw new Error("Failed to fetch")
-			return res.json()
-		},
+		queryFn: async () => searchTrucksServerFn({ data: formState }),
 	})
 
 	const handleSubmit = (e: React.FormEvent) => {
@@ -116,7 +101,7 @@ export function SearchPage() {
 				{search.isError && (
 					<p className="text-red-500">Error: {search.error.message}</p>
 				)}
-				{search.data?.map((truck: FoodTruck) => (
+				{search.data?.success && search.data.data.map((truck: FoodTruck) => (
 					<div key={truck.objectid}>{truck.applicant}</div>
 				))}
 			</div>
