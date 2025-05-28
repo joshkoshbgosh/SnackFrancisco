@@ -10,12 +10,15 @@ import {
 } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { createFileRoute } from "@tanstack/react-router"
-import type { FoodTruck, FoodTruckStatus } from "@/schemas/foodTruck"
+import type { FoodTruckStatus } from "@/schemas/foodTruck"
 import { useQuery } from "@tanstack/react-query"
 import { SearchParamsSchema } from "@/schemas/searchParams"
 import { searchTrucksServerFn } from "@/server/searchServerFn"
-import { SEARCH_REQUEST_STALE_TIME_MS } from "@/lib/constants"
+import {
+	SEARCH_REQUEST_STALE_TIME_MS,
+} from "@/lib/constants"
 import { AddressAutocomplete } from "@/components/AddressAutocomplete"
+import { MapView } from "@/components/MapView"
 
 export const Route = createFileRoute("/")({
 	component: SearchPage,
@@ -75,7 +78,7 @@ export function SearchPage() {
 		if (formState.sortBy === "PROXIMITY" && !formState.origin) {
 			// TODO: Handle the fact that after user clicks address,
 			// lat,lng lookup is async
-			alert('missing origin')
+			alert("missing origin")
 			return
 		}
 		setCommittedQuery(formState)
@@ -85,10 +88,15 @@ export function SearchPage() {
 		}
 		history.replaceState(null, "", `?${params.toString()}`)
 	}
+	const trucks = search.data?.success ? search.data.data : []
 
 	return (
-		<div className="p-4 space-y-4">
-			<form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+		<div className="">
+			<MapView trucks={trucks} onClickTruck={() => {}}/>
+			<form
+				onSubmit={handleSubmit}
+				className="grid gap-4 md:grid-cols-2 hidden"
+			>
 				<Input
 					placeholder="Applicant"
 					value={formState.applicant}
@@ -131,22 +139,14 @@ export function SearchPage() {
 						}}
 					/>
 				)}
-				{isDirty && (
-					<Button type="submit">
-						Search
-					</Button>
-				)}
+				{isDirty && <Button type="submit">Search</Button>}
 			</form>
 
-			<div className="mt-4">
+			<div className="mt-4 hidden">
 				{search.isFetching && <p>Loading...</p>}
 				{search.isError && (
 					<p className="text-red-500">Error: {search.error.message}</p>
 				)}
-				{search.data?.success &&
-					search.data.data.map((truck: FoodTruck) => (
-						<div key={truck.objectid}>{truck.applicant}</div>
-					))}
 			</div>
 		</div>
 	)

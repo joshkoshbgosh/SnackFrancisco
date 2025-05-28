@@ -1,3 +1,4 @@
+import { SF_BOUNDS } from "@/lib/constants"
 import { useState } from "react"
 import PlacesAutocomplete, {
 	geocodeByAddress,
@@ -28,14 +29,7 @@ export const AddressAutocomplete = ({
 			value={address}
 			onChange={setAddress}
 			onSelect={handleSelect}
-			searchOptions={{
-				locationRestriction: {
-					north: 37.929824,
-					south: 37.63983,
-					east: -122.28178,
-					west: -123.173825,
-				}, // Approximate bounds of SF
-			}}
+			searchOptions={{ locationRestriction: SF_BOUNDS }}
 		>
 			{({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
 				<div>
