@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-router'
 import appCss from "@/styles/app.css?url"
 import type { QueryClient } from '@tanstack/react-query'
+import { env } from '@/env'
 
 export const Route = createRootRouteWithContext<{queryClient: QueryClient}>()({
   head: () => ({
@@ -26,6 +27,13 @@ export const Route = createRootRouteWithContext<{queryClient: QueryClient}>()({
       {
         rel: "stylesheet",
         href: appCss,
+      },
+    ],
+    scripts: [
+      {
+        src: `https://maps.googleapis.com/maps/api/js?key=${env.GOOGLE_MAPS_API_KEY}&libraries=places`,
+        async: true,
+        defer: true,
       },
     ],
   }),
