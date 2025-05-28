@@ -1,10 +1,15 @@
-import type { FoodTruck } from "@/schemas/foodTruck";
-import type { parseSearchParams } from "./apiParams";
-import { filterTrucks } from "./filterTrucks";
-import { fetchFoodTrucks, fetchTruckDistances, type FetchResponse } from "./requests";
-
-const MAX_BATCH_SIZE = 25
-const MAX_CLOSEST_RESULTS = 999 // TODO: Set to 5 as per requirements if necessary
+import type { FoodTruck } from "@/schemas/foodTruck"
+import type { parseSearchParams } from "./apiParams"
+import { filterTrucks } from "./filterTrucks"
+import {
+	fetchFoodTrucks,
+	fetchTruckDistances,
+	type FetchResponse,
+} from "./requests"
+import {
+	MAX_GMAPS_DISTANCE_DESTINATIONS_BATCH_SIZE,
+	MAX_CLOSEST_RESULTS,
+} from "./constants"
 
 export const searchTrucks = async (
 	params: ReturnType<typeof parseSearchParams>,
@@ -30,8 +35,16 @@ export const searchTrucks = async (
 	const { lat, lng } = params.origin
 
 	const batches = Array.from(
-		{ length: Math.ceil(trucks.length / MAX_BATCH_SIZE) },
-		(_, i) => trucks.slice(i * MAX_BATCH_SIZE, (i + 1) * MAX_BATCH_SIZE),
+		{
+			length: Math.ceil(
+				trucks.length / MAX_GMAPS_DISTANCE_DESTINATIONS_BATCH_SIZE,
+			),
+		},
+		(_, i) =>
+			trucks.slice(
+				i * MAX_GMAPS_DISTANCE_DESTINATIONS_BATCH_SIZE,
+				(i + 1) * MAX_GMAPS_DISTANCE_DESTINATIONS_BATCH_SIZE,
+			),
 	)
 
 	// Design Tradeoff. Swalling errors at the fetchTruckDistances function level

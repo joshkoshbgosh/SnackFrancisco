@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -14,14 +14,24 @@ import type { FoodTruck } from "@/schemas/foodTruck"
 import { useQuery } from "@tanstack/react-query"
 import { SearchParamsSchema } from "@/schemas/searchParams"
 import { searchTrucksServerFn } from "@/server/searchServerFn"
+import { SEARCH_REQUEST_STALE_TIME_MS } from "@/lib/constants"
 
 export const Route = createFileRoute("/")({
 	component: SearchPage,
 	validateSearch: SearchParamsSchema,
+	loader: async (ctx) =>
+		await searchTrucksServerFn({
+			data: SearchParamsSchema.parse(
+				Object.fromEntries(
+					new URLSearchParams(ctx.location.searchStr).entries(),
+				),
+			),
+		}), // NOTE: validation already handled by validateSearch, just parsing for TS
 })
 
 export function SearchPage() {
 	const query = Route.useSearch({})
+	const loaderData = Route.useLoaderData()
 
 	const [formState, setFormState] = useState({
 		applicant: query.applicant,
@@ -31,6 +41,7 @@ export function SearchPage() {
 		sortBy: "DEFAULT" as "DEFAULT" | "PROXIMITY", // TODO: replace 'as'
 	})
 	const [committedQuery, setCommittedQuery] = useState(formState)
+
 	// TODO: This is quick and dirty. Technically might result in false positive
 	// dirty check because property order matters and I don't believe is guaranteed.
 	// Also inefficient but probably negligible. Either implement custom equality
@@ -43,17 +54,9 @@ export function SearchPage() {
 	const search = useQuery({
 		queryKey: ["search", committedQuery],
 		queryFn: async () => searchTrucksServerFn({ data: committedQuery }),
-		enabled: false,
+		initialData: loaderData,
+		staleTime: SEARCH_REQUEST_STALE_TIME_MS,
 	})
-
-	// TODO: Find a way to remove this useEffect. Unfortunately
-	// it's the easiest / cleanest way I could find to deal with the fact that 
-	// setState is async, while also getting the advantages of useQuery vs 
-	// using the client directly. Other options include setTimeout to defer refetch
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	useEffect(() => {
-		search.refetch()
-	}, [committedQuery])
 
 	// NOTE: Could use uncontrolled inputs and get their values
 	// on submit. Less state updates / re-renders but feels
@@ -117,7 +120,7 @@ export function SearchPage() {
 			</form>
 
 			<div className="mt-4">
-				{search.isPending && <p>Loading...</p>}
+				{search.isFetching && <p>Loading...</p>}
 				{search.isError && (
 					<p className="text-red-500">Error: {search.error.message}</p>
 				)}
