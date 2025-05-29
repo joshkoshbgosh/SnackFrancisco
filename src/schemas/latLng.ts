@@ -7,6 +7,8 @@ export const isValidLng = (lng: number) =>
 
 export const LatLngStringSchema = z.string().refine(
 	(value) => {
+        if (value === "") return true 
+        
 		const parts = decodeURIComponent(value).split(",")
 		if (parts.length !== 2) return false
 
@@ -14,7 +16,7 @@ export const LatLngStringSchema = z.string().refine(
 		return isValidLat(lat) && isValidLng(lng)
 	},
 	{
-		message: 'Must be a string in "lat,lng" format with valid numbers',
+		message: 'Invalid Location',
 	},
 )
 
