@@ -1,45 +1,46 @@
 import { SF_BOUNDS } from "@/lib/constants"
-import { useState } from "react"
+import { cn } from "@/lib/utils"
+import { Input } from "@/components/ui/input"
 import PlacesAutocomplete, {
 	geocodeByAddress,
 	getLatLng,
 } from "react-places-autocomplete"
 
 export const AddressAutocomplete = ({
+	value,
+	onChange,
 	onSelect,
 }: {
+	value?: string
+	onChange: (value: string) => void
 	onSelect: (address: string, lat: number, lng: number) => void
 }) => {
-	const [address, setAddress] = useState("")
-	const [error, setError] = useState<string | null>(null)
-
 	const handleSelect = async (value: string) => {
-		setAddress(value)
 		try {
 			const results = await geocodeByAddress(value)
 			const latLng = await getLatLng(results[0])
+			onChange(value)
 			onSelect(value, latLng.lat, latLng.lng)
 		} catch (e) {
-			setError("Failed to get location from address")
+			onChange("Failed to get location from address")
 		}
 	}
 
 	return (
 		<PlacesAutocomplete
-			value={address}
-			onChange={setAddress}
+			value={value}
+			onChange={onChange}
 			onSelect={handleSelect}
-			searchOptions={{ locationRestriction: SF_BOUNDS }}
+			searchOptions={{ locationRestriction: SF_BOUNDS, types: ["street_address"]}}
 		>
 			{({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-				<div>
-					<input
+				<div className="relative">
+					<Input
 						{...getInputProps({
 							placeholder: "Enter an address in San Francisco...",
-							className: "input input-bordered w-full",
 						})}
 					/>
-					<div className="bg-white border rounded mt-2">
+					<div className={cn("bg-white border rounded mt-2 absolute z-10 top-6 max-h-40 overflow-scroll",{"hidden": !loading && !suggestions.length})}>
 						{loading && <div className="p-2 text-gray-500">Loading...</div>}
 						{suggestions.map((suggestion) => {
 							const className = suggestion.active
@@ -53,7 +54,6 @@ export const AddressAutocomplete = ({
 							)
 						})}
 					</div>
-					{error && <div className="text-red-500 mt-2">{error}</div>}
 				</div>
 			)}
 		</PlacesAutocomplete>
