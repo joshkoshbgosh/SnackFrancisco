@@ -2,14 +2,14 @@ import type { ReactNode } from "react"
 import {
 	Outlet,
 	createRootRouteWithContext,
+	createRootRoute,
 	HeadContent,
 	Scripts,
 } from "@tanstack/react-router"
 import appCss from "@/styles/app.css?url"
-import type { QueryClient } from "@tanstack/react-query"
 import { env } from "@/env"
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
+export const Route = createRootRoute(
 	{
 		head: () => ({
 			meta: [

@@ -9,7 +9,6 @@ import {
 	SelectValue,
 } from "@/components/ui/select"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { useQuery } from "@tanstack/react-query"
 import {
 	getSearchParamsFromFormData,
 	SearchParamsSchema,
@@ -87,26 +86,6 @@ export function SearchPage() {
 	})
 	const sortBy = searchForm.watch("sortBy")
 
-	// TODO: Investigate why caching not working at all
-	// TODO: Handle error cases
-	const search = useQuery({
-		queryKey: ["search", query],
-		queryFn: async () => searchTrucksServerFn({ data: query }),
-		initialData: loaderData,
-		initialDataUpdatedAt: Date.now(),
-		staleTime: SEARCH_REQUEST_STALE_TIME_MS,
-		enabled: false,
-	})
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	useEffect(() => {
-		// TODO: This runs on mount, causing an unnecessary request
-		// Option 1: check if mounted
-		// Option 2: Fix caching so the effect runs but it doesn't matter
-		// Option 3: Replace useEffect
-		search.refetch()
-	}, [query])
-
 	const onValid = async (
 		formData: SearchFormSchemaType,
 		e?: BaseSyntheticEvent,
@@ -122,7 +101,7 @@ export function SearchPage() {
 	) => {
 		console.error("Invalid form submission", errors)
 	}
-	const trucks = search.data?.success ? search.data.data : []
+	const trucks = loaderData.success ? loaderData.data : []
 
 	return (
 		<div className="relative">
@@ -248,10 +227,9 @@ export function SearchPage() {
 								/>
 							)}
 							<SheetFooter className="p-0">
-								<Button type="submit" disabled={search.isFetching}>
+								<Button type="submit" disabled={isNavigating}>
 									Save changes
-									{(search.isFetching ||
-										searchForm.formState.isSubmitting ||
+									{(searchForm.formState.isSubmitting ||
 										isNavigating ||
 										searchForm.formState.isLoading ||
 										searchForm.formState.isValidating) && <Spinner />}
