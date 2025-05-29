@@ -134,136 +134,133 @@ export function SearchPage() {
 			</Button>
 			{/* TODO: Implement onClickTruck */}
 			<MapView trucks={trucks} onClickTruck={() => alert("truck")} />
-			<div className="absolute w-full h-full top-0 hidden">
-				<div className="w-full flex flex-row-reverse p-2">
-					<Sheet
-						open={isFormVisible}
-						onOpenChange={(open) => setIsFormVisible(open)}
-					>
-						<SheetContent className="p-4">
-							<Form {...searchForm}>
-								<form onSubmit={searchForm.handleSubmit(onValid, onInvalid)}>
-									<SheetHeader className="p-0 mb-4">
-										<SheetTitle>Filters</SheetTitle>
-										<SheetDescription>
-											Narrow down your food truck search
-										</SheetDescription>
-									</SheetHeader>
-									<FormField
-										control={searchForm.control}
-										name="applicant"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Name</FormLabel>
-												<FormControl>
-													<Input placeholder="Search by name..." {...field} />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={searchForm.control}
-										name="street"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Street</FormLabel>
-												<FormControl>
-													<Input placeholder="Search by street..." {...field} />
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={searchForm.control}
-										name="status"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Permit Status</FormLabel>
-												<Select
-													onValueChange={field.onChange}
-													defaultValue={field.value}
-												>
-													<FormControl>
-														<SelectTrigger>
-															<SelectValue />
-														</SelectTrigger>
-													</FormControl>
-													<SelectContent>
-														<SelectItem value="APPROVED">APPROVED</SelectItem>
-														<SelectItem value="REQUESTED">REQUESTED</SelectItem>
-														<SelectItem value="EXPIRED">EXPIRED</SelectItem>
-														<SelectItem value="SUSPEND">SUSPEND</SelectItem>
-														<SelectItem value="ISSUED">ISSUED</SelectItem>
-													</SelectContent>
-												</Select>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={searchForm.control}
-										name="sortBy"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Sort By</FormLabel>
-												<Select
-													onValueChange={field.onChange}
-													defaultValue={field.value}
-												>
-													<FormControl>
-														<SelectTrigger>
-															<SelectValue />
-														</SelectTrigger>
-													</FormControl>
-													<SelectContent>
-														<SelectItem value="DEFAULT">DEFAULT</SelectItem>
-														<SelectItem value="PROXIMITY">PROXIMITY</SelectItem>
-													</SelectContent>
-												</Select>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-									{sortBy === "PROXIMITY" && (
-										<FormField
-											control={searchForm.control}
-											name="origin"
-											render={({ field }) => (
-												<FormItem>
-													<FormLabel>Location</FormLabel>
-													<FormControl>
-														<AddressAutocomplete
-															{...field}
-															onSelect={(_address, lat, lng) => {
-																// TODO: Handle the fact that after user clicks address,
-																// lat,lng lookup is async
-																searchForm.setValue("origin", `${lat},${lng}`)
-															}}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
+
+			<Sheet
+				open={isFormVisible}
+				onOpenChange={(open) => setIsFormVisible(open)}
+			>
+				<SheetContent className="p-4">
+					<Form {...searchForm}>
+						<form onSubmit={searchForm.handleSubmit(onValid, onInvalid)}>
+							<SheetHeader className="p-0 mb-4">
+								<SheetTitle>Filters</SheetTitle>
+								<SheetDescription>
+									Narrow down your food truck search
+								</SheetDescription>
+							</SheetHeader>
+							<FormField
+								control={searchForm.control}
+								name="applicant"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Name</FormLabel>
+										<FormControl>
+											<Input placeholder="Search by name..." {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={searchForm.control}
+								name="street"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Street</FormLabel>
+										<FormControl>
+											<Input placeholder="Search by street..." {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={searchForm.control}
+								name="status"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Permit Status</FormLabel>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												<SelectItem value="APPROVED">APPROVED</SelectItem>
+												<SelectItem value="REQUESTED">REQUESTED</SelectItem>
+												<SelectItem value="EXPIRED">EXPIRED</SelectItem>
+												<SelectItem value="SUSPEND">SUSPEND</SelectItem>
+												<SelectItem value="ISSUED">ISSUED</SelectItem>
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={searchForm.control}
+								name="sortBy"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Sort By</FormLabel>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												<SelectItem value="DEFAULT">DEFAULT</SelectItem>
+												<SelectItem value="PROXIMITY">PROXIMITY</SelectItem>
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							{sortBy === "PROXIMITY" && (
+								<FormField
+									control={searchForm.control}
+									name="origin"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Location</FormLabel>
+											<FormControl>
+												<AddressAutocomplete
+													{...field}
+													onSelect={(_address, lat, lng) => {
+														// TODO: Handle the fact that after user clicks address,
+														// lat,lng lookup is async
+														searchForm.setValue("origin", `${lat},${lng}`)
+													}}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
 									)}
-									<SheetFooter className="p-0">
-										<Button type="submit" disabled={search.isFetching}>
-											Save changes
-											{(search.isFetching ||
-												searchForm.formState.isSubmitting ||
-												isNavigating ||
-												searchForm.formState.isLoading ||
-												searchForm.formState.isValidating) && <Spinner />}
-										</Button>
-									</SheetFooter>
-								</form>
-							</Form>
-						</SheetContent>
-					</Sheet>
-				</div>
-			</div>
+								/>
+							)}
+							<SheetFooter className="p-0">
+								<Button type="submit" disabled={search.isFetching}>
+									Save changes
+									{(search.isFetching ||
+										searchForm.formState.isSubmitting ||
+										isNavigating ||
+										searchForm.formState.isLoading ||
+										searchForm.formState.isValidating) && <Spinner />}
+								</Button>
+							</SheetFooter>
+						</form>
+					</Form>
+				</SheetContent>
+			</Sheet>
 		</div>
 	)
 }
