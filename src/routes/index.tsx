@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState, type BaseSyntheticEvent } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -8,17 +8,41 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { createFileRoute } from "@tanstack/react-router"
-import type { FoodTruckStatus } from "@/schemas/foodTruck"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
-import { SearchParamsSchema } from "@/schemas/searchParams"
-import { searchTrucksServerFn } from "@/server/searchServerFn"
 import {
-	SEARCH_REQUEST_STALE_TIME_MS,
-} from "@/lib/constants"
+	getSearchParamsFromFormData,
+	SearchParamsSchema,
+	type SearchParamsSchemaType,
+} from "@/schemas/searchParams"
+import { searchTrucksServerFn } from "@/server/searchServerFn"
+import { SEARCH_REQUEST_STALE_TIME_MS } from "@/lib/constants"
 import { AddressAutocomplete } from "@/components/AddressAutocomplete"
 import { MapView } from "@/components/MapView"
+import { SlidersHorizontal } from "lucide-react"
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetFooter,
+	SheetHeader,
+	SheetTitle,
+} from "@/components/ui/sheet"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import {
+	SearchFormSchema,
+	type SearchFormSchemaType,
+} from "@/schemas/searchForm"
+import {
+	Form,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormControl,
+	FormMessage,
+} from "@/components/ui/form"
+import { Spinner } from "@/components/ui/spinner"
 
 export const Route = createFileRoute("/")({
 	component: SearchPage,
@@ -33,120 +57,212 @@ export const Route = createFileRoute("/")({
 		}), // NOTE: validation already handled by validateSearch, just parsing for TS
 })
 
-type FormState = {
-	applicant?: string
-	street?: string
-	status?: FoodTruckStatus
-	origin?: string
-	sortBy: "DEFAULT" | "PROXIMITY"
+const defaultFormValues: SearchFormSchemaType = {
+	applicant: "",
+	street: "",
+	status: "APPROVED",
+	origin: "",
+	sortBy: "DEFAULT",
 }
 
+const getInitialFormValues = (
+	query: SearchParamsSchemaType,
+): SearchFormSchemaType => ({
+	...defaultFormValues,
+	...query,
+	sortBy: query.origin ? "PROXIMITY" : "DEFAULT",
+})
+
+// TODO: Extract Form
 export function SearchPage() {
 	const query = Route.useSearch({})
+	const navigate = useNavigate({ from: Route.fullPath })
+	const [isNavigating, setIsNavigating] = useState(false)
 	const loaderData = Route.useLoaderData()
 
-	const [formState, setFormState] = useState<FormState>({
-		applicant: query.applicant,
-		street: query.street,
-		status: query.status,
-		origin: query.origin,
-		sortBy: query.origin ? "PROXIMITY" : "DEFAULT",
+	const [isFormVisible, setIsFormVisible] = useState(false)
+	const searchForm = useForm<SearchFormSchemaType>({
+		resolver: zodResolver(SearchFormSchema),
+		defaultValues: getInitialFormValues(query),
 	})
-	const [committedQuery, setCommittedQuery] = useState(formState)
+	const sortBy = searchForm.watch("sortBy")
 
-	// TODO: This is quick and dirty. Technically might result in false positive
-	// dirty check because property order matters and I don't believe is guaranteed.
-	// Also inefficient but probably negligible. Either implement custom equality
-	// check or use equality checking library (probably overkill)
-	const isDirty = JSON.stringify(formState) !== JSON.stringify(committedQuery)
-
-	const updateField = (field: keyof typeof formState, value: string) => {
-		setFormState((prev) => ({ ...prev, [field]: value }))
-	}
+	// TODO: Investigate why caching not working at all
+	// TODO: Handle error cases
 	const search = useQuery({
-		queryKey: ["search", committedQuery],
-		queryFn: async () => searchTrucksServerFn({ data: committedQuery }),
+		queryKey: ["search", query],
+		queryFn: async () => searchTrucksServerFn({ data: query }),
 		initialData: loaderData,
+		initialDataUpdatedAt: Date.now(),
 		staleTime: SEARCH_REQUEST_STALE_TIME_MS,
+		enabled: false,
 	})
 
-	// NOTE: Could use uncontrolled inputs and get their values
-	// on submit. Less state updates / re-renders but feels
-	// like a premature optimization
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault()
-		if (formState.sortBy === "PROXIMITY" && !formState.origin) {
-			// TODO: Handle the fact that after user clicks address,
-			// lat,lng lookup is async
-			alert("missing origin")
-			return
-		}
-		setCommittedQuery(formState)
-		const params = new URLSearchParams()
-		for (const [key, value] of Object.entries(formState)) {
-			if (value) params.set(key, value)
-		}
-		history.replaceState(null, "", `?${params.toString()}`)
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		// TODO: This runs on mount, causing an unnecessary request
+		// Option 1: check if mounted
+		// Option 2: Fix caching so the effect runs but it doesn't matter
+		// Option 3: Replace useEffect
+		search.refetch()
+	}, [query])
+
+	const onValid = async (
+		formData: SearchFormSchemaType,
+		e?: BaseSyntheticEvent,
+	) => {
+		const formDataAsParams = getSearchParamsFromFormData(formData)
+		setIsNavigating(true)
+		await navigate({ search: formDataAsParams })
+		setIsNavigating(false)
+	}
+	const onInvalid = (
+		errors: typeof searchForm.formState.errors,
+		e?: BaseSyntheticEvent,
+	) => {
+		console.error("Invalid form submission", errors)
 	}
 	const trucks = search.data?.success ? search.data.data : []
 
 	return (
-		<div className="">
-			<MapView trucks={trucks} onClickTruck={() => {}}/>
-			<form
-				onSubmit={handleSubmit}
-				className="grid gap-4 md:grid-cols-2 hidden"
+		<div className="relative">
+			<Button
+				className="absolute top-4 right-4 z-10"
+				onClick={() => setIsFormVisible(!isFormVisible)}
 			>
-				<Input
-					placeholder="Applicant"
-					value={formState.applicant}
-					onChange={(e) => updateField("applicant", e.target.value)}
-				/>
-				<Input
-					placeholder="Street"
-					value={formState.street}
-					onChange={(e) => updateField("street", e.target.value)}
-				/>
-				<Select
-					value={formState.status}
-					onValueChange={(value) => updateField("status", value)}
-				>
-					<SelectTrigger>
-						<SelectValue placeholder="Status" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="APPROVED">Approved</SelectItem>
-						<SelectItem value="REQUESTED">Requested</SelectItem>
-						<SelectItem value="EXPIRED">Expired</SelectItem>
-					</SelectContent>
-				</Select>
-
-				<ToggleGroup
-					type="single"
-					value={formState.sortBy}
-					onValueChange={(val) => updateField("sortBy", val || "default")}
-				>
-					<ToggleGroupItem value="DEFAULT">Default</ToggleGroupItem>
-					<ToggleGroupItem value="PROXIMITY">Proximity</ToggleGroupItem>
-				</ToggleGroup>
-
-				{formState.sortBy === "PROXIMITY" && (
-					<AddressAutocomplete
-						onSelect={(_address, lat, lng) => {
-							// TODO: Handle the fact that after user clicks address,
-							// lat,lng lookup is async
-							updateField("origin", `${lat},${lng}`)
-						}}
-					/>
-				)}
-				{isDirty && <Button type="submit">Search</Button>}
-			</form>
-
-			<div className="mt-4 hidden">
-				{search.isFetching && <p>Loading...</p>}
-				{search.isError && (
-					<p className="text-red-500">Error: {search.error.message}</p>
-				)}
+				<SlidersHorizontal />
+			</Button>
+			{/* TODO: Implement onClickTruck */}
+			<MapView trucks={trucks} onClickTruck={() => alert("truck")} />
+			<div className="absolute w-full h-full top-0 hidden">
+				<div className="w-full flex flex-row-reverse p-2">
+					<Sheet
+						open={isFormVisible}
+						onOpenChange={(open) => setIsFormVisible(open)}
+					>
+						<SheetContent className="p-4">
+							<Form {...searchForm}>
+								<form onSubmit={searchForm.handleSubmit(onValid, onInvalid)}>
+									<SheetHeader className="p-0 mb-4">
+										<SheetTitle>Filters</SheetTitle>
+										<SheetDescription>
+											Narrow down your food truck search
+										</SheetDescription>
+									</SheetHeader>
+									<FormField
+										control={searchForm.control}
+										name="applicant"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Name</FormLabel>
+												<FormControl>
+													<Input placeholder="Search by name..." {...field} />
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									<FormField
+										control={searchForm.control}
+										name="street"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Street</FormLabel>
+												<FormControl>
+													<Input placeholder="Search by street..." {...field} />
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									<FormField
+										control={searchForm.control}
+										name="status"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Permit Status</FormLabel>
+												<Select
+													onValueChange={field.onChange}
+													defaultValue={field.value}
+												>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														<SelectItem value="APPROVED">APPROVED</SelectItem>
+														<SelectItem value="REQUESTED">REQUESTED</SelectItem>
+														<SelectItem value="EXPIRED">EXPIRED</SelectItem>
+														<SelectItem value="SUSPEND">SUSPEND</SelectItem>
+														<SelectItem value="ISSUED">ISSUED</SelectItem>
+													</SelectContent>
+												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									<FormField
+										control={searchForm.control}
+										name="sortBy"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>Sort By</FormLabel>
+												<Select
+													onValueChange={field.onChange}
+													defaultValue={field.value}
+												>
+													<FormControl>
+														<SelectTrigger>
+															<SelectValue />
+														</SelectTrigger>
+													</FormControl>
+													<SelectContent>
+														<SelectItem value="DEFAULT">DEFAULT</SelectItem>
+														<SelectItem value="PROXIMITY">PROXIMITY</SelectItem>
+													</SelectContent>
+												</Select>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									{sortBy === "PROXIMITY" && (
+										<FormField
+											control={searchForm.control}
+											name="origin"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Location</FormLabel>
+													<FormControl>
+														<AddressAutocomplete
+															{...field}
+															onSelect={(_address, lat, lng) => {
+																// TODO: Handle the fact that after user clicks address,
+																// lat,lng lookup is async
+																searchForm.setValue("origin", `${lat},${lng}`)
+															}}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									)}
+									<SheetFooter className="p-0">
+										<Button type="submit" disabled={search.isFetching}>
+											Save changes
+											{(search.isFetching ||
+												searchForm.formState.isSubmitting ||
+												isNavigating ||
+												searchForm.formState.isLoading ||
+												searchForm.formState.isValidating) && <Spinner />}
+										</Button>
+									</SheetFooter>
+								</form>
+							</Form>
+						</SheetContent>
+					</Sheet>
+				</div>
 			</div>
 		</div>
 	)
