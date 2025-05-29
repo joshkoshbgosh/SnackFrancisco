@@ -6,23 +6,12 @@ import {
 	GoogleDistanceMatrixResponseSchema,
 	type GoogleDistanceMatrixResponse,
 } from "@/schemas/googleMaps"
-
-export type FetchResponse<T, E = string> =
-	| {
-			success: true
-			data: T
-	  }
-	| {
-			success: false
-			error: E
-	  }
+import type { Maybe } from "./maybe"
 
 // TODO: Look into filtering on Socrata's end so as to avoid filtering work on our end
 // Not such a big deal if we're caching the responses
 // TODO: Caching
-export const fetchFoodTrucks = async (): Promise<
-	FetchResponse<FoodTruck[]>
-> => {
+export const fetchFoodTrucks = async (): Promise<Maybe<FoodTruck[]>> => {
 	try {
 		const response = await fetch(FOOD_TRUCKS_API_URL)
 		const data = await response.json()
@@ -49,7 +38,7 @@ export const fetchTruckDistances = async (
 	trucks: FoodTruck[],
 	lat: number,
 	lng: number,
-): Promise<FetchResponse<GoogleDistanceMatrixResponse>> => {
+): Promise<Maybe<GoogleDistanceMatrixResponse>> => {
 	// TODO: validate lat / lng
 	const matrixURL = buildGoogleMapsMatrixURL(trucks, lat, lng)
 

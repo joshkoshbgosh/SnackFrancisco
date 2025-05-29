@@ -1,11 +1,8 @@
 import type { FoodTruck } from "@/schemas/foodTruck"
 import type { parseSearchParams } from "./apiParams"
 import { filterTrucks } from "./filterTrucks"
-import {
-	fetchFoodTrucks,
-	fetchTruckDistances,
-	type FetchResponse,
-} from "./requests"
+import { fetchFoodTrucks, fetchTruckDistances } from "./requests"
+import type { Maybe } from "./maybe"
 import {
 	MAX_GMAPS_DISTANCE_DESTINATIONS_BATCH_SIZE,
 	MAX_CLOSEST_RESULTS,
@@ -13,7 +10,7 @@ import {
 
 export const searchTrucks = async (
 	params: ReturnType<typeof parseSearchParams>,
-): Promise<FetchResponse<FoodTruck[], { status: number; message: string }>> => {
+): Promise<Maybe<FoodTruck[], { status: number; message: string }>> => {
 	const fetchFoodTrucksResponse = await fetchFoodTrucks()
 	if (!fetchFoodTrucksResponse.success) {
 		return {
