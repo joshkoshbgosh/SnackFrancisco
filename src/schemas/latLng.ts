@@ -25,7 +25,8 @@ export const LatLngStringSchema = z
 export const parseLatLngString = (
 	latLng: string,
 ): Maybe<{ lat: number; lng: number }> => {
-	const result = LatLngStringSchema.safeParse(latLng)
+	const decodedLatLng = decodeURIComponent(latLng)
+	const result = LatLngStringSchema.safeParse(decodedLatLng)
 	if (!result.success) {
 		return { success: false, error: result.error.message }
 	}
