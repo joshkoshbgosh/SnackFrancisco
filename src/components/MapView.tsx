@@ -1,12 +1,12 @@
 import {
 	APIProvider,
 	Map as VisGLMapView,
-	Marker,
+	AdvancedMarker,
 } from "@vis.gl/react-google-maps"
 import { env } from "@/env"
 import { SF_BOUNDS, SF_CENTRE } from "@/lib/constants"
 import type { FoodTruck } from "@/schemas/foodTruck"
-import pin from "public/pin.svg"
+import { MapPin } from "lucide-react"
 
 export const MapView = (props: {
     trucks: FoodTruck[],
@@ -28,16 +28,16 @@ export const MapView = (props: {
 				clickableIcons={false}
 			>
 				{props.trucks.map((truck: FoodTruck) => (
-						<Marker
+						<AdvancedMarker
 							key={truck.objectid}
                             onClick={() => props.onClickTruck(truck)}
 							position={{
 								lat: Number(truck.location.latitude),
 								lng: Number(truck.location.longitude),
 							}}
-							animation={google.maps.Animation.DROP}
-							icon={pin}
-						/>
+						>
+							<MapPin size="50px" className="fill-primary stroke-primary-foreground animate-in fade-in slide-in-from-top-100 duration-1000" />
+						</AdvancedMarker>
 					))}
 			</VisGLMapView>
 		</APIProvider>
