@@ -116,6 +116,7 @@ export function SearchPage() {
 			<Sheet
 				open={isFormVisible}
 				onOpenChange={(open) => setIsFormVisible(open)}
+				modal={false}
 			>
 				<SheetContent className="p-4">
 					<Form {...searchForm}>
