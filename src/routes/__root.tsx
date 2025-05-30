@@ -1,7 +1,6 @@
 import type { ReactNode } from "react"
 import {
 	Outlet,
-	createRootRouteWithContext,
 	createRootRoute,
 	HeadContent,
 	Scripts,
