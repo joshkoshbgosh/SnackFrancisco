@@ -1,5 +1,4 @@
 import type { FoodTruck } from "@/schemas/foodTruck"
-import type { parseSearchParams } from "./apiParams"
 import { filterTrucks } from "./filterTrucks"
 import { fetchFoodTrucks, fetchTruckDistances } from "./requests"
 import type { Maybe } from "./maybe"
@@ -7,9 +6,11 @@ import {
 	MAX_GMAPS_DISTANCE_DESTINATIONS_BATCH_SIZE,
 	MAX_CLOSEST_RESULTS,
 } from "./constants"
+import type { SearchParamsSchemaType } from "@/schemas/searchParams"
+import { parseLatLngString } from "@/schemas/latLng"
 
 export const searchTrucks = async (
-	params: ReturnType<typeof parseSearchParams>,
+	params: SearchParamsSchemaType,
 ): Promise<Maybe<FoodTruck[], { status: number; message: string }>> => {
 	const fetchFoodTrucksResponse = await fetchFoodTrucks()
 	if (!fetchFoodTrucksResponse.success) {
@@ -29,7 +30,11 @@ export const searchTrucks = async (
 	if (!params.origin) {
 		return { success: true, data: trucks }
 	}
-	const { lat, lng } = params.origin
+	const parsedOrigin = parseLatLngString(params.origin)
+	if (!parsedOrigin.success) {
+		return { success: false, error: { status: 400, message: "Invalid Origin" } }
+	}
+	const { lat, lng } = parsedOrigin.data
 
 	const batches = Array.from(
 		{

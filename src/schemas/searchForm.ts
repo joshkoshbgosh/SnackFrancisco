@@ -14,7 +14,7 @@ export const SearchFormSchema = z
 	.refine(
 		(data) => {
 			if (data.sortBy === "PROXIMITY") {
-				return !!data.origin
+				return LatLngStringSchema.safeParse(data.origin).success
 			}
 			return true
 		},

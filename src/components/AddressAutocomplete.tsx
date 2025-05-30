@@ -22,7 +22,7 @@ export const AddressAutocomplete = ({
 			onChange(value)
 			onSelect(value, latLng.lat, latLng.lng)
 		} catch (e) {
-			onChange("Failed to get location from address")
+			console.error("Failed to get location from address")
 		}
 	}
 

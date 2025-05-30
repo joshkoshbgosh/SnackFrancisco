@@ -10,34 +10,3 @@ export const getSearchParams = (url: URL) => ({
 	applicant: url.searchParams.get("applicant") ?? undefined,
 	street: url.searchParams.get("street") ?? undefined,
 })
-
-export const parseSearchParams = (params: {
-	origin?: string
-	status?: string
-	applicant?: string
-	street?: string
-}) => {
-	const errors: typeof params = {}
-
-	const lat = Number(params.origin?.split(",")?.[0])
-	const lng = Number(params.origin?.split(",")?.[1])
-
-	if (params.origin && (!isValidLat(lat) || !isValidLng(lng))) {
-		errors.origin = "Invalid Latitude / Longitude"
-	}
-
-	if (params.status && !isValidFoodTruckStatus(params.status)) {
-		errors.status = "Invalid Status"
-	}
-
-	if (Object.keys(errors).length) {
-		return { errors }
-	}
-
-	return {
-		origin: params.origin ? { lat, lng } : undefined,
-		status: (params.status as FoodTruckStatus) ?? "APPROVED", // TODO: This 'as' shouldn't be necessary
-		applicant: params.applicant,
-		street: params.street,
-	}
-}

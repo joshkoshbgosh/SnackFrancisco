@@ -99,21 +99,29 @@ export function SearchPage() {
 	})
 	const sortBy = searchForm.watch("sortBy")
 
+	const zoomAndCenterMapOnPoint = (point:google.maps.LatLngLiteral) => {
+		if (!map) {
+			console.error('unable to zoom into point, missing map')
+			return
+		}
+		map.setCenter(point)
+		map.setZoom(15)
+	}
+
 	const onValid = async (formData: SearchFormSchemaType) => {
 		const formDataAsParams = getSearchParamsFromFormData(formData)
 		await navigate({ search: formDataAsParams })
 		searchForm.reset(formData)
 		if (!formData.origin) {
-			console.error('test b')
 			return
 		}
 		const parsedOrigin = parseLatLngString(formData.origin)
-		if (!parsedOrigin.success || !map) {
-			console.error("test")
+		if (!parsedOrigin.success) {
+			console.error('unable to zoom into invalid origin')
 			return
 		}
-		map.setCenter(parsedOrigin.data)
-		map.setZoom(15)
+
+		zoomAndCenterMapOnPoint(parsedOrigin.data)
 	}
 	const onInvalid = (errors: typeof searchForm.formState.errors) => {
 		console.error("Invalid form submission", errors)
@@ -297,12 +305,10 @@ export function SearchPage() {
 											className="mr-auto"
 											onClick={() => {
 												setActiveTruck(truck)
-												if (!map) return
-												map.setCenter({
+												zoomAndCenterMapOnPoint({
 													lat: Number(truck.location.latitude),
 													lng: Number(truck.location.longitude),
 												})
-												map.setZoom(15)
 											}}
 										>
 											<MapIcon />
