@@ -9,8 +9,8 @@ import type { FoodTruck } from "@/schemas/foodTruck"
 import { MapPin } from "lucide-react"
 
 export const MapView = (props: {
-    trucks: FoodTruck[],
-    onClickTruck: (truck: FoodTruck) => void
+	trucks: FoodTruck[]
+	onClickTruck: (truck: FoodTruck) => void
 }) => {
 	return (
 		<APIProvider apiKey={env.VITE_GOOGLE_MAPS_API_KEY}>
@@ -28,17 +28,21 @@ export const MapView = (props: {
 				clickableIcons={false}
 			>
 				{props.trucks.map((truck: FoodTruck) => (
-						<AdvancedMarker
-							key={truck.objectid}
-                            onClick={() => props.onClickTruck(truck)}
-							position={{
-								lat: Number(truck.location.latitude),
-								lng: Number(truck.location.longitude),
-							}}
-						>
-							<MapPin size="50px" className="fill-primary stroke-primary-foreground animate-in fade-in slide-in-from-top-100 duration-1000" />
-						</AdvancedMarker>
-					))}
+					<AdvancedMarker
+						key={truck.objectid}
+						onClick={() => props.onClickTruck(truck)}
+						position={{
+							lat: Number(truck.location.latitude),
+							lng: Number(truck.location.longitude),
+						}}
+					>
+						<MapPin
+							size={48}
+							strokeWidth={1.6}
+							className="fill-primary stroke-primary-foreground animate-in fade-in slide-in-from-top-100 duration-1000"
+						/>
+					</AdvancedMarker>
+				))}
 			</VisGLMapView>
 		</APIProvider>
 	)
