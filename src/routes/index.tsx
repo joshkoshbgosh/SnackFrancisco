@@ -214,8 +214,6 @@ export function SearchPage() {
 												<AddressAutocomplete
 													{...field}
 													onSelect={(_address, lat, lng) => {
-														// TODO: Handle the fact that after user clicks address,
-														// lat,lng lookup is async
 														searchForm.setValue("origin", `${lat},${lng}`)
 													}}
 												/>
