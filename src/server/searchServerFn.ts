@@ -9,13 +9,21 @@ import { setResponseStatus } from "@tanstack/start/server"
 export const searchTrucksServerFn = createServerFn()
 	.validator(SearchParamsSchema.parse)
 	.handler(async (ctx): Promise<Maybe<FoodTruck[]>> => {
-		const { status = "APPROVED", applicant, street } = ctx.data // TODO: Shouldn't need default initializer for status bc of Zod schema default. Look into this
-		const parsedOrigin = parseLatLngString(ctx.data.origin)
+		const { status = "APPROVED", applicant, street } = ctx.data
+		let origin: {lat: number, lng: number} | undefined
+		if (ctx.data.origin !== undefined) {
+			const parsedOrigin = parseLatLngString(ctx.data.origin)
+			if (!parsedOrigin.success) {
+				return { success: false, error: "Invalid origin" }
+			}
+			origin = parsedOrigin.data
+		}
+
 		const response = await searchTrucks({
 			status,
 			applicant,
 			street,
-			origin: parsedOrigin.success ? parsedOrigin.data : undefined,
+			origin,
 		})
 		if (!response.success) {
 			setResponseStatus(response.error.status)

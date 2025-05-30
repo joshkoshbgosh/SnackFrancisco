@@ -1,3 +1,4 @@
+import type { Maybe } from "@/lib/maybe"
 import z from "zod"
 
 export const isValidLat = (lat: number) =>
@@ -7,8 +8,6 @@ export const isValidLng = (lng: number) =>
 
 export const LatLngStringSchema = z.string().refine(
 	(value) => {
-        if (value === "") return true 
-        
 		const parts = decodeURIComponent(value).split(",")
 		if (parts.length !== 2) return false
 
@@ -16,19 +15,21 @@ export const LatLngStringSchema = z.string().refine(
 		return isValidLat(lat) && isValidLng(lng)
 	},
 	{
-		message: 'Invalid Location',
+		message: "Invalid Location",
 	},
 )
 
-export const parseLatLngString = (latLng: unknown) => {
-	const result = LatLngStringSchema.safeParse(latLng)
-	if (result.success)
-		return {
-			...result,
-			data: {
-				lat: Number(decodeURIComponent(result.data).split(",")[0]),
-				lng: Number(decodeURIComponent(result.data).split(",")[1]),
-			},
-		}
-	return result
+export const parseLatLngString = (
+	latLng: string,
+): Maybe<{ lat: number; lng: number }> => {
+	const decodedLatLng = decodeURIComponent(latLng)
+	const result = LatLngStringSchema.safeParse(decodedLatLng)
+	if (!result.success) {
+		return {success: false, error: result.error.message}
+	}
+	const [lat, lng] = result.data.split(",").map(Number)
+	return {
+		success: true,
+		data: { lat, lng },
+	}
 }

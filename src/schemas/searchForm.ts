@@ -8,7 +8,7 @@ export const SearchFormSchema = z
 		applicant: z.string(),
 		street: z.string(),
 		status: FoodTruckStatusSchema,
-		origin: LatLngStringSchema,
+    origin: z.union([LatLngStringSchema, z.literal("")]),
 		sortBy: z.enum(["DEFAULT", "PROXIMITY"]),
 	})
 	.refine(

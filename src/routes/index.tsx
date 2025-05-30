@@ -46,7 +46,6 @@ import {
 	FormMessage,
 } from "@/components/ui/form"
 import { Spinner } from "@/components/ui/spinner"
-import truckIconUrl from "public/truck.svg"
 import { Separator } from "@/components/ui/separator"
 import {
 	Card,
@@ -60,7 +59,7 @@ import { cn } from "@/lib/utils"
 import type { FoodTruck } from "@/schemas/foodTruck"
 import { APIProvider, useMap } from "@vis.gl/react-google-maps"
 import { env } from "@/env"
-import { LatLngStringSchema, parseLatLngString } from "@/schemas/latLng"
+import { parseLatLngString } from "@/schemas/latLng"
 
 export const Route = createFileRoute("/")({
 	component: Root,
@@ -125,6 +124,9 @@ export function SearchPage() {
 
 	const map = useMap()
 
+	const parsedQueryOrigin = parseLatLngString(query.origin ?? "")
+	const origin = parsedQueryOrigin.success ? parsedQueryOrigin.data : undefined
+
 	return (
 		<div className="relative">
 			<Button
@@ -135,7 +137,7 @@ export function SearchPage() {
 			</Button>
 			{/* TODO: Implement onClickTruck */}
 			<MapView
-				origin={parseLatLngString(query.origin).data}
+				origin={origin}
 				trucks={trucks}
 				activeTruck={activeTruck}
 				onClickTruck={(truck) => setActiveTruck(truck)}
