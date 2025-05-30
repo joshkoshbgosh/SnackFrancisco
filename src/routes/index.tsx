@@ -1,4 +1,4 @@
-import { useEffect, useState, type BaseSyntheticEvent } from "react"
+import { useMemo, useState, type BaseSyntheticEvent } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -8,7 +8,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, useNavigate, useRouterState } from "@tanstack/react-router"
 import {
 	getSearchParamsFromFormData,
 	SearchParamsSchema,
@@ -46,14 +46,14 @@ import { Spinner } from "@/components/ui/spinner"
 export const Route = createFileRoute("/")({
 	component: SearchPage,
 	validateSearch: SearchParamsSchema,
+	staleTime: SEARCH_REQUEST_STALE_TIME_MS,
+	loaderDeps: (opts) => {
+		return opts.search
+	},
 	loader: async (ctx) =>
 		await searchTrucksServerFn({
-			data: SearchParamsSchema.parse(
-				Object.fromEntries(
-					new URLSearchParams(ctx.location.searchStr).entries(),
-				),
-			),
-		}), // NOTE: validation already handled by validateSearch, just parsing for TS
+			data: ctx.deps,
+		}),
 })
 
 const defaultFormValues: SearchFormSchemaType = {
@@ -76,8 +76,12 @@ const getInitialFormValues = (
 export function SearchPage() {
 	const query = Route.useSearch({})
 	const navigate = useNavigate({ from: Route.fullPath })
-	const [isNavigating, setIsNavigating] = useState(false)
+	const isLoading = useRouterState({
+		structuralSharing: true,
+		select: (state) => state.status === "pending"
+	})
 	const loaderData = Route.useLoaderData()
+	const trucks = loaderData.success ? loaderData.data : []
 
 	const [isFormVisible, setIsFormVisible] = useState(false)
 	const searchForm = useForm<SearchFormSchemaType>({
@@ -88,20 +92,15 @@ export function SearchPage() {
 
 	const onValid = async (
 		formData: SearchFormSchemaType,
-		e?: BaseSyntheticEvent,
 	) => {
 		const formDataAsParams = getSearchParamsFromFormData(formData)
-		setIsNavigating(true)
 		await navigate({ search: formDataAsParams })
-		setIsNavigating(false)
 	}
 	const onInvalid = (
 		errors: typeof searchForm.formState.errors,
-		e?: BaseSyntheticEvent,
 	) => {
 		console.error("Invalid form submission", errors)
 	}
-	const trucks = loaderData.success ? loaderData.data : []
 
 	return (
 		<div className="relative">
@@ -227,10 +226,10 @@ export function SearchPage() {
 								/>
 							)}
 							<SheetFooter className="p-0">
-								<Button type="submit" disabled={isNavigating}>
+								<Button type="submit" disabled={isLoading}>
 									Save changes
 									{(searchForm.formState.isSubmitting ||
-										isNavigating ||
+										isLoading ||
 										searchForm.formState.isLoading ||
 										searchForm.formState.isValidating) && <Spinner />}
 								</Button>
