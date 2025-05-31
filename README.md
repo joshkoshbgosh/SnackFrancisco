@@ -82,13 +82,16 @@ There are a number of // TODO comments in the codebase, i'll only touch on some 
 *   **Data Fetching & Processing:**
     *   **Problem:** Fetching the entire dataset from `data.sfgov.org` on every load and performing client-side/server-function filtering can be inefficient for many users or if the dataset grows significantly.
     *   **Solution:**
-        1.  **Dedicated Backend & Database:** Implement a dedicated backend service that ingests the food truck data periodically into a database (e.g., PostgreSQL with PostGIS for geospatial queries, or Elasticsearch for text search).
+        1.  **Dedicated Backend & Database:** Implement a dedicated backend service that ingests the food truck data through periodic cron jobs into a database (e.g., PostgreSQL with PostGIS for geospatial queries, or Elasticsearch for text search).
         2.  **Server-Side Filtering/Pagination:** The backend API would handle all filtering, sorting, and pagination, returning only the necessary data to the client.
         3.  **Geospatial Indexing:** Use PostGIS or similar to perform efficient "nearest neighbor" searches directly in the database instead of calculating distances to all filtered trucks.
+*   **Logging / Observability**
+    *   **Problem** If a user ran into runtime errors or performance issues, I would have limited information.
+    *   **Solution** Using a service like Sentry would help get visibility
 *   **API Rate Limiting (External APIs):**
     *   **Problem:** Heavy usage could lead to hitting rate limits for Google Maps APIs or the Socrata API.
     *   **Solution:**
-        **Backend Proxy & Caching:** Route all external API calls through the dedicated backend. Implement caching (e.g., Redis) for responses from these APIs.
+        **Backend Proxy & Caching:** Route all external API calls through the dedicated backend. Implement caching (e.g., Redis) for responses from these APIs. Explore alternative approaches to distance calculation.
 *   **Client-Side Performance:**
     *   **Problem:** Rendering very large lists of trucks or complex map interactions could slow down the UI.
     *   **Solution:**
