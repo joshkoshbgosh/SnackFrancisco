@@ -149,9 +149,12 @@ npm run dev
 # or
 # yarn dev
 ```
-The application will be at `http://localhost:3000`.
+The application will be at `http://localhost:3000`
+
 The public API will be at `http://localhost:3000/api/search`
-The interactive Swagger API documentation will be at `http://localhost:3000/docs` 
+
+The interactive Swagger API documentation will be at `http://localhost:3000/docs`
+
 The OpenAPI JSON schema will be at `http://localhost:3000/api/docs/swaggerJson`
 
 ### Building for Production
