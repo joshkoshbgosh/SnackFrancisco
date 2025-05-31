@@ -92,12 +92,19 @@ There are a number of // TODO comments in the codebase, i'll only touch on some 
     *   **Problem:** Heavy usage could lead to hitting rate limits for Google Maps APIs or the Socrata API.
     *   **Solution:**
         **Backend Proxy & Caching:** Route all external API calls through the dedicated backend. Implement caching (e.g., Redis) for responses from these APIs. Explore alternative approaches to distance calculation.
+*   **Build Times / Size:**
+    *   **Problem** node_modules is already ~300MB in dev. Haven't looked into production bundle sizes
+    *   **Solution** There are probably some dependencies in my package.json that are only needed for dev, I would look into that. Code splitting and tree shaking are other things I would look into.
+*   **Security Risks**
+    *   **Problem** npm audit shows 13 moderate vulnerabilities that I haven't looked into. I also haven't set any limitations on my google maps api key
+    *   **Solution** explore npm audit results, lock down api key capabilities / referrers
 *   **Client-Side Performance:**
     *   **Problem:** Rendering very large lists of trucks or complex map interactions could slow down the UI.
     *   **Solution:**
         1.  **List Virtualization:** As mentioned, use libraries like TanStack Virtual for long lists.
         2.  **Map Marker Clustering:** For dense map areas, implement marker clustering.
         3.  **Optimized State Management:** Ensure efficient state updates to minimize re-renders. Didn't check for unecessary re-renders
+        4.  **Replace Dynamic Map with Static Map** The dynamic interactive google maps instance is cool but probably unecessary and could be replaced with google's static Map API for example.
 
 ## Steps to Run
 
