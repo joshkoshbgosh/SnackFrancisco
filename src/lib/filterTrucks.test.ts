@@ -63,7 +63,7 @@ describe("filterTrucks", () => {
 	it("should filter by applicant name (case-insensitive)", () => {
 		const result = filterTrucks({
 			trucks: mockTrucks,
-			applicant: "leo",
+			applicant: "lEo",
 			status: "APPROVED", // Should only find "Leo's Hot Dogs" as "Leo's Pizza Place" is REQUESTED
 		})
 		expect(result).toHaveLength(1)
@@ -71,7 +71,7 @@ describe("filterTrucks", () => {
 
 		const result2 = filterTrucks({
 			trucks: mockTrucks,
-			applicant: "leo",
+			applicant: "leO",
 			status: "REQUESTED",
 		})
 		expect(result2).toHaveLength(1)
@@ -110,7 +110,7 @@ describe("filterTrucks", () => {
 		const result = filterTrucks({
 			trucks: mockTrucks,
 			applicant: "leo",
-			street: "main",
+			street: "mAin",
 			status: "APPROVED",
 		})
 		expect(result).toHaveLength(1)
